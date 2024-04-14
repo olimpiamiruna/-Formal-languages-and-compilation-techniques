@@ -171,9 +171,22 @@ Token *tokenize(const char *pch){
 				if(isalpha(*pch)||*pch=='_')
 				{
 					
-					for(start=pch++;isalpha(*pch)||*pch=='_'; pch++){}
+					for(start=pch++;isalnum(*pch)||*pch=='_'; pch++){}
 					
 					char *text=extract(start,pch);
+					if (*pch == '.') {
+						pch++; //avansare peste punct
+						if (isalpha(*pch) || *pch == '_') { //daca e tot identificator
+							for (start = pch++; isalnum(*pch) || *pch == '_'; pch++) {} //cat timp e tot identificator
+							char *afterDot = extract(start, pch); //se extrage campul de dupa punct
+							//se adauga tokenul ca identificator de dupa punct
+							tk = addTk(ID);
+							tk->text = afterDot;
+							break;
+						} else {
+							err("Dupq un punctul care inaintea sa are un identificator/variabila, trebuie sa urmeze un identificator (camp)!");
+						}
+					}
 				
 					//se verifica daca ID-ul nu este de fapt un cuvant cheie
 					if(strcmp(text,"char")==0)addTk(TYPE_CHAR);else
@@ -189,7 +202,8 @@ Token *tokenize(const char *pch){
 					else{
 						
 						tk=addTk(ID);
-						tk->text=text;break;
+						tk->text=text;
+						break;
 						}
 				} else if(isdigit(*pch)) {
 						
